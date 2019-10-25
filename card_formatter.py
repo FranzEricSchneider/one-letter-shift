@@ -26,6 +26,8 @@ def filter_values(rows, bad_strings):
 
 # This doesn't quite work
 def arranger(fields, rows):
+    """TODO"""
+
     arrangement = {}
 
     index_generator = indexer()
@@ -36,12 +38,10 @@ def arranger(fields, rows):
     return arrangement
 
 
-def indexer():
-    # The page is 3 cards wide and 6 cards tall
-    width = 3
-    height = 6
-    page = width * height
+def indexer(width=3, height=6):
+    """TODO"""
 
+    page = width * height
     counter = 0
 
     while True:
@@ -58,6 +58,8 @@ def indexer():
 
 
 def formatter(fields, row):
+    """TODO"""
+
     name = "Name"
     description = "Description"
 

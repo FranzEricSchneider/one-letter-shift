@@ -1,5 +1,7 @@
 #!/usr/bin/python3
 
+import pytest
+
 from card_formatter import arranger, filter_values, formatter, indexer
 
 
@@ -24,18 +26,21 @@ def test_arranger():
     pass
 
 
-def test_indexer():
-    # TODO: Explain
-    # TODO: Pass in width and height
-    expected = ([0,  20, 1,  19, 2,  18,
-                 3,  23, 4,  22, 5,  21,
-                 6,  26, 7,  25, 8,  24,
-                 9,  29, 10, 28, 11, 27,
-                 12, 32, 13, 31, 14, 30,
-                 15, 35, 16, 34, 17, 33,
-                 36, 56, 37, 55, 38, 54])
-
-    for expected_index, index in zip(expected, indexer()):
+# TODO: Explain
+@pytest.mark.parametrize("expected, width, height", (
+    ([0,  20, 1,  19, 2,  18,
+      3,  23, 4,  22, 5,  21,
+      6,  26, 7,  25, 8,  24,
+      9,  29, 10, 28, 11, 27,
+      12, 32, 13, 31, 14, 30,
+      15, 35, 16, 34, 17, 33,
+      36, 56, 37, 55, 38, 54], 3, 6),
+    ([0, 14, 1, 13, 2, 12, 3, 11, 4, 10,
+      5, 19, 6, 18, 7, 17, 8, 16, 9, 15,
+      20, 34, 21, 33, 22, 32, 23, 31, 24, 30], 5, 2),
+))
+def test_indexer(expected, width, height):
+    for expected_index, index in zip(expected, indexer(width, height)):
         assert expected_index == index
 
 
