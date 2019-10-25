@@ -2,7 +2,7 @@
 
 import pytest
 
-from card_formatter import arranger, filter_values, formatter, indexer
+from card_formatter import arranger, filter_values, content_formatter, indexer
 
 
 def test_filter_values():
@@ -44,7 +44,7 @@ def test_indexer(expected, width, height):
         assert expected_index == index
 
 
-def test_formatter():
+def test_content_formatter():
     fields = ["Name", "Description", "Angua", "Cheery", "Detritus"]
     row = {
         "Name": "Maurice",
@@ -53,6 +53,6 @@ def test_formatter():
         "Cheery": "Littlebottom",
         "Detritus": "the Troll",
     }
-    assert list(zip(range(2), formatter(fields, row))) == \
-        [(0, 'Maurice\nEducated rodents'),
-         (1, 'Maurice\nWerewolf | Littlebottom | the Troll')]
+    assert list(zip(range(2), content_formatter(fields, row))) == \
+        [(0, "Maurice\nEducated rodents"),
+         (1, "Maurice\nWerewolf | Littlebottom | the Troll")]

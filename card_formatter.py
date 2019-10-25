@@ -24,21 +24,20 @@ def filter_values(rows, bad_strings):
                     row[key] = row[key].replace(bad, bad_strings[bad])
 
 
-# This doesn't quite work
-def arranger(fields, rows):
+def arranger(fields, rows, width, height):
     """TODO"""
 
     arrangement = {}
 
-    index_generator = indexer()
+    index_generator = indexer(width, height)
     for row in rows:
-        for content in formatter(fields, row):
+        for content in content_formatter(fields, row):
             arrangement[next(index_generator)] = content
 
     return arrangement
 
 
-def indexer(width=3, height=6):
+def indexer(width, height):
     """TODO"""
 
     page = width * height
@@ -57,7 +56,7 @@ def indexer(width=3, height=6):
             counter += page
 
 
-def formatter(fields, row):
+def content_formatter(fields, row):
     """TODO"""
 
     name = "Name"
@@ -67,6 +66,30 @@ def formatter(fields, row):
     yield "{}\n".format(row[name]) + " | ".join(
         row[field] for field in fields if field not in [name, description]
     )
+
+
+def card_formatter(arrangement, width, to_file=False):
+    """TODO"""
+
+    # Get the max index that we have to fill up to
+    max_index = max(arrangement.keys())
+
+    formatted = ""
+    for index in range(max_index + 1):
+        if index > 0 and index % width == 0:
+            formatted += "\par\n"
+
+        if index in arrangement:
+            formatted += "\mybox{" + arrangement[index].replace("\n", "\par{}") + "}\n"
+        else:
+            formatted += "\mybox{}\n"
+
+    if to_file:
+        with open("text.tex", "w") as out_file:
+            out_file.write(formatted)
+        print("Wrote to text.tex")
+    else:
+        print(formatted)
 
 
 def main():
@@ -84,8 +107,12 @@ def main():
         csv_reader = csv.DictReader(csv_file, delimiter=",")
         rows = [row for row in csv_reader]
 
-    for k, v in arranger(fields, rows).items():
-        print (k, v)
+    # for k, v in arranger(fields, rows, width=3, height=6).items():
+    #     print (k, v)
+
+    card_formatter(arranger(fields, rows, width=3, height=6),
+                   width=3,
+                   to_file=True)
 
 
 if __name__ == "__main__":
