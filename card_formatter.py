@@ -28,10 +28,10 @@ def filter_values(rows, bad_strings):
 def arranger(fields, rows):
     arrangement = {}
 
+    index_generator = indexer()
     for row in rows:
-        indices = indexer()
-        for index in indices:
-            arrangement[index] = formatter(fields, row)
+        for content in formatter(fields, row):
+            arrangement[next(index_generator)] = content
 
     return arrangement
 
@@ -45,10 +45,11 @@ def indexer():
     counter = 0
 
     while True:
-        width_offset = int(((counter % width) - (width - 1) /  2.0) * -2)
+        yield counter
 
-        yield (counter,
-               counter + page + width_offset)
+        width_offset = int(((counter % width) - (width - 1) /  2.0) * -2)
+        yield counter + page + width_offset
+
         counter += 1
 
         # When we've filled the front and backside of a page, skip two pages
@@ -81,7 +82,8 @@ def main():
         csv_reader = csv.DictReader(csv_file, delimiter=",")
         rows = [row for row in csv_reader]
 
-    print(arranger(fields, rows))
+    for k, v in arranger(fields, rows).items():
+        print (k, v)
 
 
 if __name__ == "__main__":

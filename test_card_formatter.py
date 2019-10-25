@@ -25,18 +25,18 @@ def test_arranger():
 
 
 def test_indexer():
-    expected = ([0,  20], [1,  19], [2,  18],
-                [3,  23], [4,  22], [5,  21],
-                [6,  26], [7,  25], [8,  24],
-                [9,  29], [10, 28], [11, 27],
-                [12, 32], [13, 31], [14, 30],
-                [15, 35], [16, 34], [17, 33],
-                [36, 56], [37, 55], [38, 54])
+    # TODO: Explain
+    # TODO: Pass in width and height
+    expected = ([0,  20, 1,  19, 2,  18,
+                 3,  23, 4,  22, 5,  21,
+                 6,  26, 7,  25, 8,  24,
+                 9,  29, 10, 28, 11, 27,
+                 12, 32, 13, 31, 14, 30,
+                 15, 35, 16, 34, 17, 33,
+                 36, 56, 37, 55, 38, 54])
 
-    for expected_indices, indices in zip(expected, indexer()):
-        assert len(indices) == 2
-        assert expected_indices[0] == indices[0]
-        assert expected_indices[1] == indices[1]
+    for expected_index, index in zip(expected, indexer()):
+        assert expected_index == index
 
 
 def test_formatter():
