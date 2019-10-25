@@ -4,35 +4,56 @@ import argparse
 import csv
 
 
+
 # Problematic strings to find and replace 
 BAD_STRINGS = {}
 
 
-def filter_values(rows):
+def filter_values(rows, bad_strings):
     for row in rows:
+        print("row", row)
         for key in row:
-            for bad_string in BAD_STRINGS:
-                if bad_string in row[key]:
+            print("key", key)
+            for bad in bad_strings:
+                print("bad", bad)
+                print("row[key]", row[key])
+                if bad in row[key]:
                     print("{!r} found in {}, replaced with {!r}".format(
-                        bad_string, row[key], BAD_STRINGS[bad_string]
+                        bad, row[key], bad_strings[bad]
                     ))
-                    row[key] = row[key].replace(bad_string,
-                                                BAD_STRINGS[bad_string])
+                    row[key] = row[key].replace(bad, bad_strings[bad])
 
 
+# This doesn't quite work
 def arranger(fields, rows):
-    arrangement = {
-        index: content in zip(indexer(), formatter(fields, row))
-        for row in rows
-    }
+    arrangement = {}
+
+    for row in rows:
+        indices = indexer()
+        for index in indices:
+            arrangement[index] = formatter(fields, row)
+
+    return arrangement
 
 
 def indexer():
     # The page is 3 cards wide and 6 cards tall
     width = 3
     height = 6
+    page = width * height
 
-    pass
+    counter = 0
+
+    while True:
+        width_offset = int(((counter % width) - (width - 1) /  2.0) * -2)
+
+        yield (counter,
+               counter + page + width_offset)
+        counter += 1
+
+        # When we've filled the front and backside of a page, skip two pages
+        if counter % page == 0:
+            counter += page
 
 
 def formatter(fields, row):
@@ -60,9 +81,7 @@ def main():
         csv_reader = csv.DictReader(csv_file, delimiter=",")
         rows = [row for row in csv_reader]
 
-    print(fields)
-    print('')
-    print(rows)
+    print(arranger(fields, rows))
 
 
 if __name__ == "__main__":
