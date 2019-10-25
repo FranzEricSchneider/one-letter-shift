@@ -59,7 +59,7 @@ def main():
     parser.add_argument("file", help="Text file to permute phrases for")
     args = parser.parse_args()
 
-    with open(args.file) as phrase_file:
+    with open(args.file, "r") as phrase_file:
         while True:
             phrase = phrase_file.readline().strip().lower()
             if not phrase:
