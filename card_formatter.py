@@ -19,6 +19,19 @@ BAD_STRINGS = {}
 
 
 def filter_values(rows, bad_strings):
+    """Search through rows and remove bad string snippets.
+
+    Useful when taking something automatically exported from the spreadsheet
+    that you don't want to clean by hand.
+
+    Arguments:
+        rows: list of dictionaries, form {"field name": "content string"}.
+            The content strings are what are searched
+        bad_strings: dictionary of {"search string": "replace string"}
+
+    Returns:
+        Nothing. Modifies rows in place
+    """
     for row in rows:
         for key in row:
             for bad in bad_strings:
@@ -30,15 +43,26 @@ def filter_values(rows, bad_strings):
 
 
 def arranger(fields, rows, width, height):
-    """TODO"""
+    """Returns dictionary of final card page index to content.
 
+    Arguments:
+        fields: list of strings, length n, where the fields and the keys of
+            the row dictionary are 1:1. The order of fields determines how
+            things will be displayed
+        rows: list of dictionaries, form {"field name": "content string"}
+        width: integer, number of cards wide on a page
+        height: integer, number of cards high on a page
+
+    Returns:
+        Dictionary of {index (int): "formatted content"}, where the index
+            refers to the final page index
+    """
     arrangement = {}
-
+    # Dynamically assign indices to the front and back sides of card content
     index_generator = indexer(width, height)
     for row in rows:
         for content in content_formatter(fields, row):
             arrangement[next(index_generator)] = content
-
     return arrangement
 
 
@@ -61,19 +85,18 @@ def indexer(width, height):
     Yields:
         Integer index of the card on double-sided printed paper
     """
-
     page = width * height
     counter = 0
-
     while True:
+        # The index for the front page (simple)
         yield counter
-
+        # The index for the back page needs to be flipped across the vertical
+        # axis, takes a more complicated calculation
         width_offset = int(((counter % width) - (width - 1) /  2.0) * -2)
         yield counter + page + width_offset
-
+        # Bookkeep
         counter += 1
-
-        # When we've filled the front and backside of a page, skip two pages
+        # When we've filled the front and backside of a page, skip a page
         if counter % page == 0:
             counter += page
 
@@ -127,7 +150,8 @@ def card_formatter(arrangement, width, to_file=False):
 
 def main():
     parser = argparse.ArgumentParser(description=__doc__)
-    parser.add_argument("csv", help="CSV to draw card data from")
+    parser.add_argument("csv",
+                        help="CSV to draw card data from")
     parser.add_argument("-f", "--to-file",
                         help="Writes tex code to text.tex instead of printing",
                         action="store_true")
@@ -138,11 +162,16 @@ def main():
         csv_reader = csv.reader(csv_file, delimiter=",")
         fields = next(csv_reader)
 
-    # Store all the data as a list of dicts, all with the same fields
+    # Store all the data as a list of dicts, all with the same field keys
     with open(args.csv, "r") as csv_file:
         csv_reader = csv.DictReader(csv_file, delimiter=",")
         rows = [row for row in csv_reader]
 
+    # If we have something to look for, filter
+    if BAD_STRINGS:
+        filter_values(rows, BAD_STRINGS)
+
+    # Print or write the content out, depending on args
     card_formatter(arranger(fields, rows, width=3, height=6),
                    width=3,
                    to_file=args.to_file)

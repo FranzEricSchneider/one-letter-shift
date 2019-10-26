@@ -1,11 +1,13 @@
-#!/usr/bin/python3
+#!/usr/bin/python
 
+import mock
 import pytest
 
-from card_formatter import arranger, filter_values, content_formatter, indexer
+import card_formatter
 
 
 def test_filter_values():
+    """Check that characters and strings are replaced correctly."""
     rows = [{
         "aching": "TifFany",
         "corporal": "Carrot",
@@ -16,15 +18,25 @@ def test_filter_values():
         "A": "o",
         "F": "ff",
     }
-    filter_values(rows, bad_strings)
+    card_formatter.filter_values(rows, bad_strings)
     assert rows[0]["aching"] == "Tifffany"
     assert rows[0]["corporal"] == "Carry"
     assert rows[0]["weatherwax"] == "Esmereldo"
 
 
-def test_arranger():
-    pass
-
+@mock.patch('card_formatter.content_formatter')
+@mock.patch('card_formatter.indexer')
+def test_arranger(indexer_mock, content_mock):
+    """Indices and content should be zipped together in a dictionary."""
+    indexer_mock.return_value=iter(range(25, 35))
+    content_mock.return_value=["a", "b"]
+    arrangement = card_formatter.arranger(fields=None, rows=[10, 20],
+                                          width=None, height=None)
+    # The result should be of length len(content_mock)*len(rows), combining
+    # whatever indexer returns with the content_mock return value
+    assert arrangement == {
+        25: "a", 26: "b", 27: "a", 28: "b",
+    }
 
 @pytest.mark.parametrize("expected, width, height", (
     ([0,  20, 1,  19, 2,  18,
@@ -40,7 +52,8 @@ def test_arranger():
 ))
 def test_indexer(expected, width, height):
     """Check double-sided indices with several page sizes, wrapping pages."""
-    for expected_index, index in zip(expected, indexer(width, height)):
+    for expected_index, index in zip(
+            expected, card_formatter.indexer(width, height)):
         assert expected_index == index
 
 
@@ -54,6 +67,7 @@ def test_content_formatter():
         "Cheery": "Littlebottom",
         "Detritus": "the Troll",
     }
-    assert list(zip(range(2), content_formatter(fields, row))) == \
+    assert list(zip(range(2),
+                    card_formatter.content_formatter(fields, row))) == \
         [(0, "Maurice\nEducated rodents"),
          (1, "Maurice\nWerewolf | Littlebottom | the Troll")]
