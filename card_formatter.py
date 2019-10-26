@@ -2,7 +2,7 @@
 
 """
 TODO:
-    Polish the tests and docstrings
+    Figure out how to call py.test in python3
 
     Sort things appropriately by level and interest
     Color code the boxes
@@ -40,6 +40,47 @@ def filter_values(rows, bad_strings):
                         bad, row[key], bad_strings[bad]
                     ))
                     row[key] = row[key].replace(bad, bad_strings[bad])
+
+
+def card_formatter(arrangement, width, to_file=False):
+    """Format card index/content for LaTeX, return string and may go to file.
+
+    Arguments:
+        arrangement: see output of docstring for arranger
+        width: integer, number of cards wide on a page
+        to_file: boolean, if we write the full content to text.tex (overwrites)
+
+    Returns:
+        String, full LaTeX formatted set of cards
+    """
+
+    # Get the max index that we have to fill up to
+    max_index = max(arrangement.keys())
+    # Prep the string that we will build up card by card
+    formatted = ""
+    # Fill in all available indices (max_index + 1 to actually include the
+    # max index needed)
+    for index in range(max_index + 1):
+        # Split each line with a paragraph break
+        if index > 0 and index % width == 0:
+            formatted += "\par\n"
+        # Add available content or filler
+        if index in arrangement:
+            # When the "\n" is written to file it actually makes a line break,
+            # which breaks the \mybox{} command, replace it \par so it results
+            # in a LaTeX newline
+            formatted += "\mybox{" + arrangement[index].replace("\n", "\par{}") + "}\n"
+        else:
+            # For incomplete pages (where there's only content on certain
+            # indices that skip spaces) fill in with empty boxes
+            formatted += "\mybox{}\n"
+    # Write to file or print
+    if to_file:
+        with open("text.tex", "w") as out_file:
+            out_file.write(formatted)
+        print("Wrote to text.tex")
+
+    return formatted
 
 
 def arranger(fields, rows, width, height):
@@ -124,30 +165,6 @@ def content_formatter(fields, row):
     )
 
 
-def card_formatter(arrangement, width, to_file=False):
-    """TODO"""
-
-    # Get the max index that we have to fill up to
-    max_index = max(arrangement.keys())
-
-    formatted = ""
-    for index in range(max_index + 1):
-        if index > 0 and index % width == 0:
-            formatted += "\par\n"
-
-        if index in arrangement:
-            formatted += "\mybox{" + arrangement[index].replace("\n", "\par{}") + "}\n"
-        else:
-            formatted += "\mybox{}\n"
-
-    if to_file:
-        with open("text.tex", "w") as out_file:
-            out_file.write(formatted)
-        print("Wrote to text.tex")
-    else:
-        print(formatted)
-
-
 def main():
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("csv",
@@ -172,9 +189,11 @@ def main():
         filter_values(rows, BAD_STRINGS)
 
     # Print or write the content out, depending on args
-    card_formatter(arranger(fields, rows, width=3, height=6),
-                   width=3,
-                   to_file=args.to_file)
+    tex_output = card_formatter(arranger(fields, rows, width=3, height=6),
+                                width=3,
+                                to_file=args.to_file)
+    if not args.to_file:
+        print(tex_output)
 
 
 if __name__ == "__main__":

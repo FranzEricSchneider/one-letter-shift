@@ -24,6 +24,29 @@ def test_filter_values():
     assert rows[0]["weatherwax"] == "Esmereldo"
 
 
+@pytest.mark.parametrize("to_file", [True, False])
+@mock.patch('__builtin__.open')
+def test_card_formatter(open_mock, to_file):
+    """Check some features of the final output for LaTeX."""
+    arrangement = {0: "Commander", 9: "Sam\nVimes"}
+    width = 4
+    output = card_formatter.card_formatter(arrangement, width, to_file)
+
+    # Check whether we tried to write to file
+    if to_file:
+        open_mock.assert_called_once()
+    else:
+        assert not open_mock.called
+    # Assert that we've wrapped 10 cards (up to index 9) based on the page width
+    assert output.count("\par\n") == int((max(arrangement.keys()) + 1) / width)
+    # Check that the \n was appropriately removed
+    assert "Sam\par{}Vimes" in output
+    assert "Sam\nVimes" not in output
+    # Check that we have 10 cards, 8 empty (max index 9)
+    assert output.count("\mybox{}") == 8
+    assert output.count("\mybox{") == 10
+
+
 @mock.patch('card_formatter.content_formatter')
 @mock.patch('card_formatter.indexer')
 def test_arranger(indexer_mock, content_mock):
