@@ -26,7 +26,6 @@ def test_arranger():
     pass
 
 
-# TODO: Explain
 @pytest.mark.parametrize("expected, width, height", (
     ([0,  20, 1,  19, 2,  18,
       3,  23, 4,  22, 5,  21,
@@ -40,11 +39,13 @@ def test_arranger():
       20, 34, 21, 33, 22, 32, 23, 31, 24, 30], 5, 2),
 ))
 def test_indexer(expected, width, height):
+    """Check double-sided indices with several page sizes, wrapping pages."""
     for expected_index, index in zip(expected, indexer(width, height)):
         assert expected_index == index
 
 
 def test_content_formatter():
+    """Test that name/description are right, then everything is appended."""
     fields = ["Name", "Description", "Angua", "Cheery", "Detritus"]
     row = {
         "Name": "Maurice",
